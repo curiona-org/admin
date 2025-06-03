@@ -471,7 +471,7 @@ export function DataTable({
                           column.toggleVisibility(!!value)
                         }
                       >
-                        {column.id}
+                        {column.columnDef.header?.toString()}
                       </DropdownMenuCheckboxItem>
                     );
                   })}

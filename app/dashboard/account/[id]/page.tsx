@@ -1,8 +1,9 @@
-import { DataTable } from "@/components/tables/roadmaps-data-table";
+import { DataTable } from "@/components/tables/user-roadmaps-data-table";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Filters } from "@/lib/services/api.service";
 import { getUser } from "./actions";
+
+import { AccountInformation } from "@/components/account-information";
 
 export default async function AccountDetailPage({
   params,
@@ -16,8 +17,8 @@ export default async function AccountDetailPage({
     limit: 10,
   };
 
-  const user = await getUser(Number(id), filter);
-  const userRoadmaps = user.data.roadmaps;
+  const { data: user } = await getUser(Number(id), filter);
+  const userRoadmaps = user.roadmaps;
 
   const pagination = {
     ...filter,
@@ -29,21 +30,9 @@ export default async function AccountDetailPage({
   return (
     <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
       <div className='w-full flex-col justify-start gap-6'>
-        <div className='relative flex flex-col gap-4 overflow-auto px-4 lg:px-6'>
-          <h1 className='text-2xl font-semibold'>Account Information</h1>
-          <div className='flex flex-col gap-2'>
-            <Avatar className='size-24'>
-              <AvatarImage src={user.data.avatar} />
-            </Avatar>
-            <p>
-              <strong>Name:</strong> {user.data.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {user.data.email}
-            </p>
-          </div>
-        </div>
+        <AccountInformation user={user} />
         <DataTable
+          userId={user.id}
           title='Roadmaps Generated'
           data={userRoadmaps.items}
           paginationOptions={pagination}

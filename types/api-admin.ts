@@ -21,7 +21,28 @@ export type GetUserOutput = {
   is_suspended: boolean;
   is_admin: boolean;
   joined_at: string;
-  roadmaps: Omit<ListRoadmapsOutput, "creator"> & RoadmapProgressionSummary;
+  roadmaps: FilteredList<{
+    id: number;
+    title: string;
+    slug: string;
+    description: string;
+    total_topics: number;
+    total_bookmarks: number;
+    created_at: string;
+    updated_at: string;
+    personalization_options: {
+      daily_time_availability: {
+        value: number;
+        unit: "minutes" | "hours" | "days" | "weeks" | "months";
+      };
+      total_duration: {
+        value: number;
+        unit: "minutes" | "hours" | "days" | "weeks" | "months";
+      };
+      skill_level: "beginner" | "intermediate" | "advanced";
+    };
+    progression: RoadmapProgressionSummary;
+  }>;
 };
 
 export type ListUsersOutput = FilteredList<GetUserOutput>;

@@ -12,3 +12,30 @@ export async function getUser(id: number, filters: Filters) {
     throw handleCurionaError(error);
   }
 }
+
+export async function suspendUser(id: number) {
+  try {
+    const result = await adminService.suspendUser(id);
+    return result;
+  } catch (error) {
+    throw handleCurionaError(error);
+  }
+}
+
+export async function unsuspendUser(id: number) {
+  try {
+    const result = await adminService.unsuspendUser(id);
+    return result;
+  } catch (error) {
+    throw handleCurionaError(error);
+  }
+}
+
+export async function deleteUser(id: number) {
+  try {
+    const result = await adminService.deleteUser(id);
+    return result;
+  } catch (error) {
+    throw handleCurionaError(error);
+  }
+}

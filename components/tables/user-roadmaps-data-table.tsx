@@ -20,14 +20,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
   IconDotsVertical,
+  IconLayoutColumns,
   IconLoader,
-  IconMail,
-  IconShieldCheckFilled,
 } from "@tabler/icons-react";
 import {
   ColumnDef,
@@ -44,22 +44,18 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import dayjs from "dayjs";
 import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import {
-  deleteUser,
-  listUsers,
-  suspendUser,
-  unsuspendUser,
-} from "@/app/dashboard/actions";
+import { getUser } from "@/app/dashboard/account/[id]/actions";
+import { deleteRoadmap } from "@/app/dashboard/roadmap/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -81,19 +77,40 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useDebounce from "@/hooks/use-debounce";
+import { APIResponse, Filters } from "@/lib/services/api.service";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/providers/auth-provider";
+import { GetUserOutput } from "@/types/api-admin";
 import Link from "next/link";
 import { Input } from "../ui/input";
 
 export const schema = z.object({
   id: z.number(),
-  name: z.string(),
-  email: z.string(),
-  is_admin: z.boolean(),
-  is_suspended: z.boolean(),
-  total_roadmaps: z.number(),
-  joined_at: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  description: z.string(),
+  total_topics: z.number(),
+  total_bookmarks: z.number(),
+  created_at: z.string(),
+  personalization_options: z.object({
+    daily_time_availability: z.object({
+      value: z.number(),
+      unit: z.enum(["minutes", "hours", "days", "weeks", "months"]),
+    }),
+    total_duration: z.object({
+      value: z.number(),
+      unit: z.enum(["minutes", "hours", "days", "weeks", "months"]),
+    }),
+    skill_level: z.enum(["beginner", "intermediate", "advanced"]),
+  }),
+  progression: z.object({
+    total_topics: z.number(),
+    finished_topics: z.number(),
+    completion_percentage: z.number(),
+    is_finished: z.boolean(),
+    finished_at: z.string(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  }),
 });
 
 export const paginationOptionsSchema = z.object({
@@ -131,16 +148,16 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "user",
-    header: "Full Name",
+    accessorKey: "title",
+    header: "Title",
     cell: ({ row }) => {
       return (
         <Link
-          href={`/dashboard/account/${row.original.id}`}
+          href={`/dashboard/roadmap/${row.original.id}`}
           className='flex items-center'
         >
           <span className='text-primary hover:underline'>
-            {row.original.name}
+            {row.original.title}
           </span>
           <IconChevronRight className='inline ml-1 size-4' />
         </Link>
@@ -149,98 +166,59 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <Badge
-        variant='outline'
-        className='text-muted-foreground hover:text-primary px-1.5'
-      >
-        <IconMail className='mr-1' />
-        <a href={`mailto:${row.original.email}`}>{row.original.email}</a>
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
-    cell: ({ row }) =>
-      row.original.is_admin ? (
-        <Badge variant='default' className='text-accent px-1.5'>
-          <IconShieldCheckFilled className='size-4' /> Admin
-        </Badge>
-      ) : (
-        <Badge variant='outline' className='text-muted-foreground px-1.5'>
-          User
-        </Badge>
-      ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <>
-        <Label htmlFor={`${row.original.id}-target`} className='sr-only'>
-          Target
-        </Label>
-        <Select
-          onValueChange={async (value) => {
-            if (value === "suspend") {
-              toast.promise(suspendUser(row.original.id), {
-                loading: `Saving ${row.original.name}`,
-                success: `User ${row.original.name} suspended`,
-                error: `Failed to suspend user ${row.original.name}`,
-              });
-              row.original.is_suspended = true;
-            } else {
-              toast.promise(unsuspendUser(row.original.id), {
-                loading: `Saving ${row.original.name}`,
-                success: `User ${row.original.name} is now active`,
-                error: `Failed to activate user ${row.original.name}`,
-              });
-              row.original.is_suspended = false;
-            }
-          }}
-          defaultValue={row.original.is_suspended ? "suspend" : "active"}
-        >
-          <SelectTrigger id={`${row.original.id}-target`} className='w-32'>
-            <SelectValue
-              placeholder={
-                row.original.is_suspended ? (
-                  <span className='text-destructive'>Suspended</span>
-                ) : (
-                  <span className='text-primary'>Active</span>
-                )
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem className='text-primary' value='active'>
-              Active
-            </SelectItem>
-            <SelectItem className='text-destructive' value='suspend'>
-              Suspended
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </>
-    ),
-  },
-  {
-    accessorKey: "roadmaps",
-    header: "Roadmaps",
+    accessorKey: "skill_level",
+    header: "Skill Level",
     cell: ({ row }) => {
-      return row.original.total_roadmaps;
+      switch (row.original.personalization_options.skill_level) {
+        case "beginner":
+          return (
+            <Badge
+              variant='secondary'
+              className='bg-blue-500 text-accent px-1.5 h-5'
+            >
+              Beginner
+            </Badge>
+          );
+        case "intermediate":
+          return (
+            <Badge
+              variant='secondary'
+              className='bg-yellow-500 text-accent px-1.5 h-5'
+            >
+              Intermediate
+            </Badge>
+          );
+        case "advanced":
+          return (
+            <Badge
+              variant='secondary'
+              className='bg-red-500 text-accent px-1.5 h-5'
+            >
+              Advanced
+            </Badge>
+          );
+        default:
+          return (
+            <Badge variant='outline' className='text-accent px-1.5'>
+              Unknown
+            </Badge>
+          );
+      }
     },
-    enableHiding: false,
   },
   {
-    accessorKey: "joinedAt",
-    header: "Joined At",
+    accessorKey: "total_topics",
+    header: "Total Topics",
     cell: ({ row }) => {
-      return dayjs(row.original.joined_at).format("MMM D, YYYY HH:mm");
+      return row.original.total_topics;
     },
-    enableHiding: false,
+  },
+  {
+    accessorKey: "progress",
+    header: "Progress",
+    cell: ({ row }) => {
+      return row.original.progression.completion_percentage.toFixed(2) + "%";
+    },
   },
   {
     id: "actions",
@@ -303,14 +281,27 @@ type DataTableMeta = {
 };
 
 export function DataTable({
+  title = "",
+  userId,
   data: initialData,
   paginationOptions,
+  dataSource = getUser,
 }: {
+  userId: number;
   data: z.infer<typeof schema>[];
   paginationOptions: z.infer<typeof paginationOptionsSchema>;
+  title?: string;
+  dataSource?: (
+    id: number,
+    filters: Filters
+  ) => Promise<APIResponse<GetUserOutput>>;
 }) {
-  const { session } = useAuth();
   const [data, setData] = React.useState(() => initialData);
+  const dataSourceFn = React.useCallback(
+    (filters: Filters) => dataSource(userId, filters),
+    [userId, dataSource]
+  );
+
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -340,24 +331,29 @@ export function DataTable({
   const [isPending, startTransition] = React.useTransition();
   React.useEffect(() => {
     const fetchData = async () => {
-      const users = await listUsers({
+      const roadmaps = await dataSourceFn({
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         search: debouncedSearch,
       });
 
       startTransition(() => {
-        setData(users.data.items);
+        setData(roadmaps.data.roadmaps.items);
         setPagination({
-          pageIndex: users.data.current_page - 1,
+          pageIndex: roadmaps.data.roadmaps.current_page - 1,
           pageSize: pagination.pageSize,
         });
-        setTotalPages(users.data.total_pages);
+        setTotalPages(roadmaps.data.roadmaps.total_pages);
       });
     };
 
     fetchData();
-  }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
+  }, [
+    dataSourceFn,
+    pagination.pageIndex,
+    pagination.pageSize,
+    debouncedSearch,
+  ]);
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
@@ -391,31 +387,26 @@ export function DataTable({
     manualPagination: true,
     meta: {
       removeRow: (row: Row<z.infer<typeof schema>>) => {
-        if (row.original.id === session?.user.id) {
-          toast.error("You cannot delete your own account.");
-          return;
-        }
-
-        toast.promise(deleteUser(row.original.id), {
-          loading: `Deleting ${row.original.name}`,
+        toast.promise(deleteRoadmap(row.original.id), {
+          loading: `Deleting ${row.original.title}`,
           success: async () => {
-            const users = await listUsers({
+            const { data: user } = await dataSourceFn({
               page: pagination.pageIndex + 1,
               limit: pagination.pageSize,
               search: debouncedSearch,
             });
 
             startTransition(() => {
-              setData(users.data.items);
+              setData(user.roadmaps.items);
               setPagination({
-                pageIndex: users.data.current_page - 1,
+                pageIndex: user.roadmaps.current_page - 1,
                 pageSize: pagination.pageSize,
               });
-              setTotalPages(users.data.total_pages);
+              setTotalPages(user.roadmaps.total_pages);
             });
-            return `User ${row.original.name} deleted`;
+            return `User ${row.original.title} deleted`;
           },
-          error: `Failed to delete user ${row.original.name}`,
+          error: `Failed to delete user ${row.original.title}`,
         });
       },
     },
@@ -437,18 +428,51 @@ export function DataTable({
       <div className='relative flex flex-col gap-4 overflow-auto px-4 lg:px-6'>
         <div className='flex flex-row justify-between py-2'>
           <div className='flex flex-row items-center gap-2'>
-            <h2 className='text-2xl font-semibold tracking-tight'>
-              Accounts List
-            </h2>
+            <h2 className='text-2xl font-semibold tracking-tight'>{title}</h2>
             {isPending && (
               <IconLoader className='size-6 animate-spin text-muted-foreground' />
             )}
           </div>
-          <Input
-            placeholder='Search...'
-            onChange={(event) => setSearch(event.target.value)}
-            className='max-w-sm'
-          />
+          <div className='flex flex-row items-center gap-2'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' size='sm'>
+                  <IconLayoutColumns />
+                  <span className='hidden lg:inline'>Customize Columns</span>
+                  <span className='lg:hidden'>Columns</span>
+                  <IconChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='w-56'>
+                {table
+                  .getAllColumns()
+                  .filter(
+                    (column) =>
+                      typeof column.accessorFn !== "undefined" &&
+                      column.getCanHide()
+                  )
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className='capitalize'
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.columnDef.header?.toString()}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Input
+              placeholder='Search...'
+              onChange={(event) => setSearch(event.target.value)}
+              className='max-w-sm'
+            />
+          </div>
         </div>
         <div className='overflow-hidden rounded-lg border'>
           <DndContext
