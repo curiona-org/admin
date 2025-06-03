@@ -170,35 +170,16 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     cell: ({ row }) => {
       switch (row.original.personalization_options.skill_level) {
         case "beginner":
-          return (
-            <Badge
-              variant='secondary'
-              className='bg-blue-500 text-accent px-1.5 h-5'
-            >
-              Beginner
-            </Badge>
-          );
+          return <Badge className='bg-green-500 text-accent'>Beginner</Badge>;
         case "intermediate":
           return (
-            <Badge
-              variant='secondary'
-              className='bg-yellow-500 text-accent px-1.5 h-5'
-            >
-              Intermediate
-            </Badge>
+            <Badge className='bg-blue-500 text-accent'>Intermediate</Badge>
           );
         case "advanced":
-          return (
-            <Badge
-              variant='secondary'
-              className='bg-red-500 text-accent px-1.5 h-5'
-            >
-              Advanced
-            </Badge>
-          );
+          return <Badge className='bg-red-500 text-accent'>Advanced</Badge>;
         default:
           return (
-            <Badge variant='outline' className='text-accent px-1.5'>
+            <Badge variant='outline' className='text-accent'>
               Unknown
             </Badge>
           );

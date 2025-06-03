@@ -4,6 +4,7 @@ import {
   filtersToQueryString,
 } from "@/lib/services/api.service";
 import {
+  GetRoadmapOutput,
   GetStatisticsOutput,
   GetUserOutput,
   ListRoadmapsOutput,
@@ -58,7 +59,9 @@ export class AdminService {
   }
 
   async getRoadmap(id: number) {
-    return apiClient.get(`/admin/roadmaps/${id}`).then((res) => res?.data);
+    return apiClient
+      .get<GetRoadmapOutput>(`/admin/roadmaps/${id}`)
+      .then((res) => res?.data);
   }
 
   async deleteRoadmap(id: number) {

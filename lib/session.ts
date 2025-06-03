@@ -68,7 +68,12 @@ export const shouldRefreshToken = (
   session: Session,
   thresholdMs: number
 ): boolean => {
-  if (!session.tokens?.access_token_expires_at || isSessionExpired(session)) {
+  console.log("[SESSION] Checking if token should be refreshed");
+  console.log(`[SESSION] Is session expired? ${isSessionExpired(session)}`);
+  console.log(
+    `[SESSION] Access token expires at: ${session.tokens?.access_token_expires_at}`
+  );
+  if (!session.tokens?.access_token_expires_at || !isSessionExpired(session)) {
     return false;
   }
 
@@ -83,7 +88,12 @@ export function isSessionExpired(session: Session | null) {
     return true;
   }
 
-  return !session.tokens || new Date() > session.tokens.access_token_expires_at;
+  if (!session.tokens?.access_token_expires_at) {
+    return true;
+  }
+  const expiryTime = new Date(session.tokens.access_token_expires_at).getTime();
+  const currentTime = new Date().getTime();
+  return expiryTime < currentTime;
 }
 
 export async function destroySession(response: Response) {

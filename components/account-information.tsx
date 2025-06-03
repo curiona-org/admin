@@ -85,19 +85,23 @@ export function AccountInformation({ user }: AccountInformationProps) {
         </Avatar>
         <div className='grid grid-cols-1 md:grid-cols-2 py-2 gap-6 md:gap-12 lg:gap-32 xl:gap-52'>
           <div className='flex flex-col gap-6'>
-            <div className='flex flex-row items-center'>
+            <div className='grid grid-cols-3 items-center'>
               <Label className='w-24'>
                 <span className='text-lg font-medium'>Name</span>
               </Label>
-              <Input value={user.name} readOnly className='w-full' />
+              <Input value={user.name} readOnly className='w-full col-span-2' />
             </div>
-            <div className='flex flex-row items-center'>
+            <div className='grid grid-cols-3 items-center'>
               <Label className='w-24'>
                 <span className='text-lg font-medium'>Email</span>
               </Label>
-              <Input value={user.email} readOnly className='w-full' />
+              <Input
+                value={user.email}
+                readOnly
+                className='w-full col-span-2'
+              />
             </div>
-            <div className='flex flex-row justify-start items-center'>
+            <div className='grid grid-cols-3 items-center'>
               <Label className='w-24'>
                 <span className='text-lg font-medium'>Status</span>
               </Label>
@@ -106,7 +110,7 @@ export function AccountInformation({ user }: AccountInformationProps) {
                 defaultValue={user.is_suspended ? "suspend" : "active"}
                 disabled={session?.user.id === user.id}
               >
-                <SelectTrigger id={`${user.id}-target`} className='w-32'>
+                <SelectTrigger id={`${user.id}-target`} className='w-full'>
                   <SelectValue
                     placeholder={
                       user.is_suspended ? (
@@ -132,17 +136,17 @@ export function AccountInformation({ user }: AccountInformationProps) {
             </div>
           </div>
           <div className='flex flex-col gap-6'>
-            <div className='flex flex-row items-center md:gap-6'>
+            <div className='grid grid-cols-3'>
               <Label className='w-24'>
                 <span className='text-lg font-medium'>Joined On</span>
               </Label>
               <Input
                 value={dayjs(user.joined_at).format("DD/MM/YYYY HH:mm:ss")}
                 readOnly
-                className='w-full'
+                className='w-full col-span-2'
               />
             </div>
-            <div className='flex flex-row items-center md:gap-6'>
+            <div className='grid grid-cols-3'>
               <Label className='w-24'>
                 <span className='text-lg font-medium'>Role</span>
               </Label>
@@ -158,13 +162,11 @@ export function AccountInformation({ user }: AccountInformationProps) {
                 )}
               </Button>
             </div>
-            <div className='flex flex-row items-center md:gap-6'>
+            <div className='grid grid-cols-3'>
               <Label className='w-24'>
                 <span className='text-lg font-medium'>Roadmaps</span>
               </Label>
-              <Button variant='outline' className='w-32'>
-                {user.roadmaps.total} Roadmaps
-              </Button>
+              <Button variant='outline'>{user.roadmaps.total} Roadmaps</Button>
             </div>
           </div>
         </div>
