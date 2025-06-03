@@ -15,7 +15,9 @@ import { useAuth } from "@/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconLoader } from "@tabler/icons-react";
 import { redirect } from "next/navigation";
+import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 export const formSchemaSignIn = z.object({
@@ -34,7 +36,13 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { signIn, signInGoogle, authIsLoading } = useAuth();
+  const { signIn, signInGoogle, authIsLoading, authError } = useAuth();
+
+  React.useEffect(() => {
+    if (authError) {
+      toast.error(authError);
+    }
+  }, [authError]);
 
   const { register, handleSubmit } = useFormSignIn();
   const onSubmit = handleSubmit(async ({ email, password }) => {

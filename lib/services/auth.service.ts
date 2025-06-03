@@ -4,7 +4,10 @@ import { AuthOutput, AuthRefreshOutput } from "@/types/api-auth";
 export class AuthService {
   async loginEmailPassword(data: { email: string; password: string }) {
     return apiClient
-      .post<AuthOutput>("/auth", data, { withCredentials: true })
+      .post<AuthOutput>("/auth", data, {
+        withCredentials: true,
+        headers: { "X-Admin": true },
+      })
       .then((res) => res?.data);
   }
 

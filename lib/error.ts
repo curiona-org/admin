@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 export enum CurionaErrorCodes {
   INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
   UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
   ACCOUNT_SUSPENDED = "ACCOUNT_SUSPENDED",
   SIGNUP_DIFFERENT_METHOD = "SIGNUP_DIFFERENT_METHOD",
   SESSION_EXPIRED = "SESSION_EXPIRED",
@@ -24,6 +25,8 @@ export const ERROR_MESSAGES: Record<CurionaErrorCodes, string> = {
     "The credentials you entered are incorrect. Please try again.",
   [CurionaErrorCodes.UNAUTHORIZED]:
     "You are not authorized to perform this action.",
+  [CurionaErrorCodes.FORBIDDEN]:
+    "You do not have permission to perform this action.",
   [CurionaErrorCodes.ACCOUNT_SUSPENDED]:
     "Your account has been suspended. Please contact support for assistance.",
   [CurionaErrorCodes.SIGNUP_DIFFERENT_METHOD]:

@@ -8,6 +8,7 @@ export type AuthOutput = {
   refresh_token_expires_at: string;
   refresh_token_expires_in: number;
   account: Account;
+  is_admin: boolean;
 };
 
 export type AuthRefreshOutput = Pick<
