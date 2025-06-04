@@ -17,7 +17,7 @@ export function RoadmapInformationTopics({
   topics,
 }: RoadmapInformationTopicsProps) {
   return (
-    <div className='relative flex flex-col gap-4 overflow-auto px-4 lg:px-6'>
+    <>
       <h1 className='text-2xl font-semibold'>Topics</h1>
 
       <Accordion
@@ -65,6 +65,6 @@ export function RoadmapInformationTopics({
           </AccordionItem>
         ))}
       </Accordion>
-    </div>
+    </>
   );
 }

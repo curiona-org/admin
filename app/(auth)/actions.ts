@@ -39,9 +39,9 @@ export async function refreshSessionAction(): Promise<
 
   const result = await authService.refresh(refresh.value);
 
+  cookieStore.delete(config.SESSION_COOKIE_NAME);
+  cookieStore.delete("refresh_token");
   if (!result.success) {
-    cookieStore.delete(config.SESSION_COOKIE_NAME);
-    cookieStore.delete("refresh_token");
     return result;
   }
 

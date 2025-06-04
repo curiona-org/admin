@@ -1,13 +1,33 @@
 import { FilteredList } from "./filtered-list";
 
+type RoadmapStatisticOutput = {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type GetStatisticsOutput = {
   user: {
     users_registered_count: number;
   };
   roadmap: {
     roadmaps_generated_count: number;
+    roadmaps_generated_today_count: number;
     roadmaps_ongoing_count: number;
     roadmaps_finished_count: number;
+    highest_rated_roadmap: RoadmapStatisticOutput & {
+      rating: number;
+      rating_count: number;
+    };
+    most_bookmarked_roadmap: RoadmapStatisticOutput & {
+      bookmark_count: number;
+    };
+    most_active_roadmap: RoadmapStatisticOutput & {
+      activity_count: number;
+    };
   };
 };
 
@@ -100,6 +120,26 @@ export type ListRoadmapsOutput = FilteredList<{
     skill_level: "beginner" | "intermediate" | "advanced";
   };
   creator: {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string;
+    is_suspended: boolean;
+    joined_at: string;
+  };
+}>;
+
+export type ListRoadmapRatingsOutput = FilteredList<{
+  is_rated: boolean;
+  account_id: number;
+  roadmap_id: number;
+  progression_total_topics: number;
+  progression_total_finished_topics: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+  user: {
     id: number;
     name: string;
     email: string;

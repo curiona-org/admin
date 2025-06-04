@@ -7,6 +7,7 @@ import {
   GetRoadmapOutput,
   GetStatisticsOutput,
   GetUserOutput,
+  ListRoadmapRatingsOutput,
   ListRoadmapsOutput,
   ListUsersOutput,
 } from "@/types/api-admin";
@@ -66,5 +67,15 @@ export class AdminService {
 
   async deleteRoadmap(id: number) {
     return apiClient.delete(`/admin/roadmaps/${id}`).then((res) => res?.data);
+  }
+
+  async listRoadmapRatings(id: number, params: Filters) {
+    const queryParams = filtersToQueryString(params);
+
+    return apiClient
+      .get<ListRoadmapRatingsOutput>(
+        `/admin/roadmaps/${id}/ratings?${queryParams}`
+      )
+      .then((res) => res?.data);
   }
 }
