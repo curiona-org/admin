@@ -45,7 +45,7 @@ export function Statistics({ data }: StatisticsProps) {
         title='Highest Rated Roadmap'
         description={
           <span>
-            {data.roadmap.highest_rated_roadmap.rating} / 5 (
+            {data.roadmap.highest_rated_roadmap.rating.toFixed(2)} / 5 (
             {data.roadmap.highest_rated_roadmap.rating_count} rating
             {data.roadmap.highest_rated_roadmap.rating_count > 1 ? "s" : ""})
           </span>
