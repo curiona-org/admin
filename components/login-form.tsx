@@ -36,13 +36,19 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { signIn, signInGoogle, authIsLoading, authError } = useAuth();
+  const { signIn, signInGoogle, authIsLoading, authError, clearError } =
+    useAuth();
 
   React.useEffect(() => {
     if (authError) {
       toast.error(authError);
     }
-  }, [authError]);
+
+    // Reset the error after displaying it
+    return () => {
+      clearError();
+    };
+  }, [authError, clearError]);
 
   const { register, handleSubmit } = useFormSignIn();
   const onSubmit = handleSubmit(async ({ email, password }) => {

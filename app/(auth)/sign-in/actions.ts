@@ -20,7 +20,7 @@ export type SignInActionInput = {
 export async function signInAction({
   email,
   password,
-}: SignInActionInput): Promise<APIResponse<AuthOutput>> {
+}: SignInActionInput): Promise<APIResponse<AuthOutput | null>> {
   try {
     const result = await authService.loginEmailPassword({ email, password });
 
@@ -56,7 +56,13 @@ export async function signInAction({
 
     return result;
   } catch (error) {
-    throw handleCurionaError(error);
+    const err = handleCurionaError(error);
+    return {
+      success: false,
+      code: err.code,
+      message: err.message,
+      data: null,
+    };
   }
 }
 

@@ -16,6 +16,7 @@ type AuthContextType = {
   signInGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  clearError: () => void;
 };
 
 type AuthProviderProps = {
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
   signInGoogle: async () => {},
   signOut: async () => {},
   refreshSession: async () => {},
+  clearError: () => {},
 });
 
 export const useAuth = () => {
@@ -79,7 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
       const result = await signInAction(params);
 
-      if (!result.success) {
+      if (!result.success || !result.data) {
         setError(result.message);
         setIsLoading(false);
         return;
@@ -102,6 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     } catch (error) {
       const err = handleCurionaError(error);
       setError(err.message || "Failed to sign in");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -139,6 +142,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
+  // Clear error
+  const clearError = () => {
+    setError(null);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -151,6 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         signInGoogle,
         signOut,
         refreshSession,
+        clearError,
       }}
     >
       {children}
