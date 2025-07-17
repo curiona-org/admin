@@ -44,7 +44,7 @@ export function RoadmapInformationTopics({
                   <p className='text-sm'>{topic.pro_tips}</p>
                 </div>
               </div>
-              {topic.subtopics.map((subtopic) => (
+              {topic.subtopics && topic.subtopics.map((subtopic) => (
                 <div key={subtopic.id} className='flex flex-col gap-4 ml-5'>
                   <Separator className='my-2' />
                   <h4 className='text-lg'>{subtopic.title}</h4>
